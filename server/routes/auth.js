@@ -2,9 +2,9 @@ const express = require('express');
 const passport = require('passport');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
-const auth = require('../middleware/auth');
+const { auth, authMiddleware } = require('../middleware/auth');
 const router = express.Router();
-const { register, login } = require('../controllers/auth/authController');
+const { register, login, logout,googleCallback } = require('../controllers/auth/authController');
 
 // Generate JWT Token
 const generateToken = (id) => {
@@ -95,23 +95,29 @@ router.get('/google',
 // @desc    Google OAuth callback
 // @route   GET /api/auth/google/callback
 // @access  Public
-router.get('/google/callback',
+router.get('/google/callback', 
   passport.authenticate('google', { session: false }),
-  (req, res) => {
-    const token = generateToken(req.user._id);
-    setTokenCookie(res, token);
-    
-    // Redirect to frontend with success
-    res.redirect(`${process.env.CLIENT_URL || 'http://localhost:5173'}/auth/success`);
-  }
+  googleCallback
 );
+// router.get('/google/callback',
+//   passport.authenticate('google', { session: false }),
+//   (req, res) => {
+//     const token = generateToken(req.user._id);
+//     setTokenCookie(res, token);
+
+//     // Redirect to frontend with success
+//     res.redirect(`${process.env.CLIENT_URL || 'http://localhost:5173'}/auth/success`);
+//   }
+// );
 
 // @desc    Get current user
 // @route   GET /api/auth/me
 // @access  Private
-router.get('/me', auth, async (req, res) => {
+router.get('/me', authMiddleware, async (req, res) => {
   try {
-    const user = await User.findById(req.user.id).select('-password');
+  //  console.log(req.user)
+    const user = await User.findById(req.user.userId).select('-password');
+    // console.log(user);
     res.json(user);
   } catch (error) {
     res.status(500).json({ message: 'Server error' });
@@ -121,9 +127,10 @@ router.get('/me', auth, async (req, res) => {
 // @desc    Logout user
 // @route   POST /api/auth/logout
 // @access  Private
-router.post('/logout', (req, res) => {
-  res.clearCookie('jwt');
-  res.json({ message: 'Logged out successfully' });
-});
+router.post('/logout', authMiddleware, logout);
+// router.post('/logout', (req, res) => {
+//   res.clearCookie('jwt');
+//   res.json({ message: 'Logged out successfully' });
+// });
 
 module.exports = router;

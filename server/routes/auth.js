@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const { auth, authMiddleware } = require('../middleware/auth');
 const router = express.Router();
-const { register, login, logout,googleCallback } = require('../controllers/auth/authController');
+const { register, login, logout,googleCallback, refreshToken, authMe } = require('../controllers/auth/authController');
 
 // Generate JWT Token
 const generateToken = (id) => {
@@ -113,16 +113,18 @@ router.get('/google/callback',
 // @desc    Get current user
 // @route   GET /api/auth/me
 // @access  Private
-router.get('/me', authMiddleware, async (req, res) => {
-  try {
-  //  console.log(req.user)
-    const user = await User.findById(req.user.userId).select('-password');
-    // console.log(user);
-    res.json(user);
-  } catch (error) {
-    res.status(500).json({ message: 'Server error' });
-  }
-});
+
+router.get('/me', authMiddleware, authMe);
+// router.get('/me', authMiddleware, async (req, res) => {
+//   try {
+//   //  console.log(req.user)
+//     const user = await User.findById(req.user.userId).select('-password');
+//     // console.log(user);
+//     res.json(user);
+//   } catch (error) {
+//     res.status(500).json({ message: 'Server error' });
+//   }
+// });
 
 // @desc    Logout user
 // @route   POST /api/auth/logout

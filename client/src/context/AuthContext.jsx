@@ -22,7 +22,8 @@ export const AuthProvider = ({ children }) => {
   const checkAuth = async () => {
     try {
       const response = await authAPI.getMe();
-      sessionStorage.clear('accessToken');
+      // sessionStorage.clear('accessToken');
+      console.log(response.data);
       setUser(response.data);
     } catch (error) {
       setUser(null);

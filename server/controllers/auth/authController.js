@@ -4,6 +4,8 @@ const User = require('../../models/User');
 const catchAsyncError = require('../../middleware/catchAsyncError');
 const ErrorHandler = require('../../middleware/errorHandler');
 const { generateAuthTokens, verifyToken } = require('../../utils/generateToken');
+const { sendOtpMail } = require('../../email/emailVerify/sendOtpMail');
+const { sendSuccessMail } = require('../../email/emailGreetings/successMail');
 
 exports.register = catchAsyncError(async (req, res, next) => {
     const { name, email, password } = req.body;
@@ -19,7 +21,15 @@ exports.register = catchAsyncError(async (req, res, next) => {
         password
     });
 
+    let options = {
+        type: 'registration',
+    }
+
     if (user) {
+        sendSuccessMail(user.email, user.name, 'Welcome to Blissora - Registration Successful!', 'Your account has been successfully created. Welcome to our community! You can now access all features and start exploring.',options).catch(error => {
+            console.error('Failed to send welcome email:', error);
+            // Don't throw error - registration should succeed even if email fails
+        });
         const { refreshToken, accessToken } = await generateAuthTokens({
             userId: user._id,
             name: user.name,

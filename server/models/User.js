@@ -9,7 +9,8 @@ const UserSchema = new mongoose.Schema({
   email: {
     type: String,
     required: true,
-    unique: true
+    unique: true,
+    lowercase: true
   },
   password: {
     type: String
@@ -19,6 +20,56 @@ const UserSchema = new mongoose.Schema({
   },
   avatar: {
     type: String
+  },
+  profile: {
+    phone: String,
+    avatar: String,
+    dateOfBirth: Date
+  },
+  address: [{
+    type: {
+      type: String,
+      enum: ['home', 'work', 'other'],
+      default: 'home'
+    },
+    street: String,
+    city: String,
+    state: String,
+    country: String,
+    zipCode: String,
+    isDefault: Boolean
+  }],
+  isVerified: {
+    type: Boolean,
+    default: false
+  },
+  sellerProfile: {
+    storeName: String,
+    storeDescription: String,
+    businessEmail: String,
+    taxId: String,
+    isApproved: {
+      type: Boolean,
+      default: false
+    },
+    rating: {
+      type: Number,
+      default: 0
+    },
+    totalSales: {
+      type: Number,
+      default: 0
+    }
+  },
+  preferences: {
+    newsletter: {
+      type: Boolean,
+      default: true
+    },
+    notifications: {
+      type: Boolean,
+      default: true
+    }
   },
   role: {
     type: String,
